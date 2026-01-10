@@ -12,11 +12,51 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/orders")
 public class OrderController {
 
     @Autowired
     private OrderService orderService;
+
+    @PostMapping
+    public ResponseEntity<?> createOrder(@RequestBody Map<String, Object> request) {
+        try {
+            // Validate userId
+            if (request.get("userId") == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "userId is required"));
+            }
+            
+            Long userId = Long.valueOf(request.get("userId").toString());
+            
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> items = (List<Map<String, Object>>) request.get("items");
+            
+            if (items == null || items.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "items are required"));
+            }
+            
+            // Process each item in the cart
+            List<Purchase> purchases = new java.util.ArrayList<>();
+            for (Map<String, Object> item : items) {
+                Long courseId = Long.valueOf(item.get("courseId").toString());
+                Purchase purchase = orderService.processCheckout(userId, courseId);
+                purchases.add(purchase);
+            }
+            
+            return ResponseEntity.status(HttpStatus.CREATED).body(purchases);
+        } catch (NumberFormatException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Invalid userId or courseId format: " + e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Internal server error: " + e.getMessage()));
+        }
+    }
 
     @PostMapping("/checkout")
     public ResponseEntity<?> checkout(@RequestBody CheckoutRequest request) {

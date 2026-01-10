@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a1a; color: #fff; }
+        .section { margin: 20px 0; padding: 20px; background: #2a2a2a; border-radius: 8px; }
+        h2 { color: #00ff00; }
+        pre { background: #000; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        button { background: #00ff00; color: #000; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #00cc00; }
+        .status { padding: 5px 10px; border-radius: 4px; display: inline-block; margin: 5px 0; }
+        .success { background: #004400; color: #00ff00; }
+        .error { background: #440000; color: #ff0000; }
+    </style>
+</head>
+<body>
+    <h1>CyberEd Platform API Test</h1>
+    
+    <div class="section">
+        <h2>API Connectivity Test</h2>
+        <button onclick="testCourses()">Test Courses API</button>
+        <button onclick="testChallenges()">Test Challenges API</button>
+        <button onclick="testNews()">Test News API</button>
+        <button onclick="testAll()">Test All</button>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        
+        async function testAPI(endpoint, name) {
+            const resultsDiv = document.getElementById('results');
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`);
+                const data = await response.json();
+                const count = Array.isArray(data) ? data.length : 'N/A';
+                resultsDiv.innerHTML += `
+                    <div class="status success">✓ ${name}: ${count} items</div><br>
+                    <pre>${JSON.stringify(data.slice(0, 2), null, 2)}</pre>
+                `;
+                return true;
+            } catch (error) {
+                resultsDiv.innerHTML += `
+                    <div class="status error">✗ ${name}: ${error.message}</div><br>
+                `;
+                return false;
+            }
+        }
+        
+        async function testCourses() {
+            document.getElementById('results').innerHTML = '';
+            await testAPI('/courses', 'Courses');
+        }
+        
+        async function testChallenges() {
+            document.getElementById('results').innerHTML = '';
+            await testAPI('/challenges', 'Challenges');
+        }
+        
+        async function testNews() {
+            document.getElementById('results').innerHTML = '';
+            await testAPI('/news', 'News');
+        }
+        
+        async function testAll() {
+            document.getElementById('results').innerHTML = '<h3>Running all tests...</h3>';
+            await testAPI('/courses', 'Courses');
+            await testAPI('/challenges', 'Challenges');
+            await testAPI('/news', 'News');
+        }
+    </script>
+</body>
+</html>

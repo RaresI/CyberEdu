@@ -31,3 +31,9 @@ HELP.md
 # H2 Database files
 *.db
 *.trace.db
+
+# Node.js
+node_modules/
+frontend/node_modules/
+*.next/
+frontend/.next/

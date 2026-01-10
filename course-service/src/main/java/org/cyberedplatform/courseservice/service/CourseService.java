@@ -21,7 +21,12 @@ public class CourseService {
             throw new RuntimeException("Course with this title already exists");
         }
 
-        Course course = new Course(title, description, price, quantity);
+        Course course = new Course();
+        course.setTitle(title);
+        course.setDescription(description);
+        course.setPrice(price);
+        course.setQuantity(quantity);
+        course.setCategory("General"); // Default category
         return courseRepository.save(course);
     }
 

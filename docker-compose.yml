@@ -138,6 +138,89 @@ services:
       - USER_SERVICE_URL=http://user-service:8081
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/forum_db
 
+  # Challenge Service
+  challenge-service:
+    build:
+      context: ./challenge-service
+      dockerfile: Dockerfile
+    container_name: challenge-service
+    ports:
+      - "8085:8085"
+    networks:
+      - cybered-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8085/challenges/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  # News Service
+  news-service:
+    build:
+      context: ./news-service
+      dockerfile: Dockerfile
+    container_name: news-service
+    ports:
+      - "8086:8086"
+    networks:
+      - cybered-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8086/news/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    networks:
+      - cybered-network
+    depends_on:
+      user-service:
+        condition: service_started
+      course-service:
+        condition: service_started
+      order-service:
+        condition: service_started
+      forum-service:
+        condition: service_started
+      challenge-service:
+        condition: service_started
+      news-service:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  # Frontend (Next.js)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - cybered-network
+    depends_on:
+      api-gateway:
+        condition: service_started
+    environment:
+      - API_GATEWAY_URL=http://api-gateway:8080
+
 networks:
   cybered-network:
     driver: bridge

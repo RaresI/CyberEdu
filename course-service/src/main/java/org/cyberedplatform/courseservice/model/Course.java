@@ -23,6 +23,9 @@ public class Course {
     @Column(nullable = false)
     private int quantity;
 
+    @Column
+    private String category;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -33,11 +36,12 @@ public class Course {
 
     public Course() {}
 
-    public Course(String title, String description, double price, int quantity) {
+    public Course(String title, String description, double price, int quantity, String category) {
         this.title = title;
         this.description = description;
         this.price = price;
         this.quantity = quantity;
+        this.category = category;
     }
 
     // Getters and Setters
@@ -79,6 +83,14 @@ public class Course {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public Instant getCreatedAt() {
