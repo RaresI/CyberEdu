@@ -48,35 +48,49 @@ export default function ProfilePage() {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
         <div className="card mb-8">
-          <h1 className="text-3xl font-bold mb-6">My Profile</h1>
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">My Profile</h1>
+              <p className="text-gray-400">Manage your account and view your activity</p>
+            </div>
+            <button
+              onClick={logout}
+              className="bg-red-600 hover:bg-red-700 px-6 py-2 rounded font-semibold transition-colors"
+            >
+              Logout
+            </button>
+          </div>
           
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm text-gray-500">Username</label>
-              <p className="text-xl">{user.username}</p>
-            </div>
-            
-            <div>
-              <label className="text-sm text-gray-500">Email</label>
-              <p className="text-xl">{user.email}</p>
-            </div>
-
-            <div>
-              <label className="text-sm text-gray-500">Role</label>
-              <p className="text-xl">
-                <span className="px-3 py-1 bg-primary rounded text-white">
-                  {user.role || 'LEARNER'}
-                </span>
-              </p>
+          <div className="space-y-6">
+            <div className="bg-gray-900 p-6 rounded-lg">
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-2xl font-bold">
+                  {user.username.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <label className="text-sm text-gray-500 block">Username</label>
+                  <p className="text-2xl font-semibold">{user.username}</p>
+                </div>
+              </div>
             </div>
 
-            <div className="pt-4">
-              <button
-                onClick={logout}
-                className="bg-red-600 hover:bg-red-700 px-6 py-2 rounded font-semibold"
-              >
-                Logout
-              </button>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-gray-900 p-4 rounded-lg text-center">
+                <p className="text-3xl font-bold text-primary">{orders.length}</p>
+                <p className="text-sm text-gray-400 mt-1">Total Purchases</p>
+              </div>
+              <div className="bg-gray-900 p-4 rounded-lg text-center">
+                <p className="text-3xl font-bold text-primary">
+                  ${orders.reduce((sum, order) => sum + order.totalPrice, 0).toFixed(2)}
+                </p>
+                <p className="text-sm text-gray-400 mt-1">Total Spent</p>
+              </div>
+              <div className="bg-gray-900 p-4 rounded-lg text-center">
+                <p className="text-3xl font-bold text-primary">
+                  {orders.reduce((sum, order) => sum + (order.items?.length || 0), 0)}
+                </p>
+                <p className="text-sm text-gray-400 mt-1">Courses Owned</p>
+              </div>
             </div>
           </div>
         </div>

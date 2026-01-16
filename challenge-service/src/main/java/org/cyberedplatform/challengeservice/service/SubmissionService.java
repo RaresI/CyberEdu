@@ -12,9 +12,11 @@ import org.cyberedplatform.challengeservice.repository.UserScoreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -28,6 +30,11 @@ public class SubmissionService {
 
     @Autowired
     private UserScoreRepository userScoreRepository;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    private static final String USER_SERVICE_URL = "http://user-service:8081";
 
     @Transactional
     public SubmissionResponse submitFlag(SubmitFlagRequest request) {
@@ -102,7 +109,11 @@ public class SubmissionService {
         for (UserScore score : topScores) {
             LeaderboardEntry entry = new LeaderboardEntry();
             entry.setUserId(score.getUserId());
-            entry.setUsername("User" + score.getUserId()); // Placeholder - would fetch from user service
+            
+            // Fetch username from user service
+            String username = getUsernameFromUserService(score.getUserId());
+            entry.setUsername(username);
+            
             entry.setTotalPoints(score.getTotalPoints());
             entry.setChallengesSolved(score.getChallengesSolved());
             entry.setRank(rank++);
@@ -110,6 +121,19 @@ public class SubmissionService {
         }
 
         return leaderboard;
+    }
+
+    private String getUsernameFromUserService(Long userId) {
+        try {
+            String url = USER_SERVICE_URL + "/api/users/" + userId;
+            Map<String, Object> userResponse = restTemplate.getForObject(url, Map.class);
+            if (userResponse != null && userResponse.containsKey("username")) {
+                return (String) userResponse.get("username");
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to fetch username for user " + userId + ": " + e.getMessage());
+        }
+        return "User" + userId; // Fallback to placeholder if service call fails
     }
 
     public UserScore getUserScore(Long userId) {

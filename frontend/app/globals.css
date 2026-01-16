@@ -33,25 +33,9 @@ body {
   position: relative;
 }
 
-/* Matrix rain effect */
+/* Matrix rain effect - DISABLED for performance */
 .cyberedu::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0, 255, 65, 0.03) 2px,
-      rgba(0, 255, 65, 0.03) 4px
-    );
-  pointer-events: none;
-  animation: matrix-scroll 20s linear infinite;
-  z-index: 0;
+  display: none;
 }
 
 @keyframes matrix-scroll {
@@ -89,21 +73,30 @@ body {
   animation: glitch 0.3s infinite;
 }
 
-/* Neon glow effect */
+/* Neon glow effect - DISABLED for performance */
 .neon {
-  text-shadow: 
-    0 0 5px currentColor,
-    0 0 10px currentColor,
-    0 0 20px currentColor,
-    0 0 40px currentColor;
+  color: currentColor;
+}
+
+/* Slide-in animation for notifications */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
 }
 
 .neon-box {
-  box-shadow: 
-    0 0 5px var(--primary),
-    0 0 10px var(--primary),
-    0 0 20px var(--primary),
-    inset 0 0 10px rgba(0, 255, 65, 0.1);
+  border: 1px solid var(--primary);
+  /* Removed all box-shadow for better performance */
 }
 
 /* Banner/Header */
@@ -162,7 +155,7 @@ body {
   width: 100%;
 }
 
-/* Cards with cyber border */
+/* Cards with cyber border - Performance mode */
 .card {
   background: linear-gradient(135deg, rgba(20, 20, 20, 0.9) 0%, rgba(10, 10, 10, 0.9) 100%);
   border: 1px solid rgba(0, 255, 65, 0.3);
@@ -170,39 +163,16 @@ body {
   padding: 1.5rem;
   position: relative;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: border-color 0.3s ease;
 }
 
 .card::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    45deg,
-    transparent 30%,
-    rgba(0, 255, 65, 0.1) 50%,
-    transparent 70%
-  );
-  transform: rotate(45deg);
-  transition: all 0.6s ease;
-  opacity: 0;
-}
-
-.card:hover::before {
-  opacity: 1;
-  animation: shine 1.5s ease-in-out infinite;
+  display: none; /* Disabled shine effect for performance */
 }
 
 .card:hover {
   border-color: var(--primary);
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 
-    0 0 20px rgba(0, 255, 65, 0.3),
-    0 10px 40px rgba(0, 0, 0, 0.5),
-    inset 0 0 20px rgba(0, 255, 65, 0.05);
+  /* Removed transform and box-shadow for better performance */
 }
 
 @keyframes shine {
@@ -314,7 +284,8 @@ body {
 }
 
 .pulse {
-  animation: pulse 2s ease-in-out infinite;
+  /* Disabled animation for performance */
+  animation: none;
 }
 
 /* Scanlines */
@@ -471,23 +442,15 @@ body {
   background-size: 50px 50px;
 }
 
-/* Glowing text */
+/* Glowing text - DISABLED for performance */
 .glow-text {
   color: var(--primary);
-  text-shadow: 
-    0 0 5px var(--primary),
-    0 0 10px var(--primary),
-    0 0 20px var(--primary),
-    0 0 40px var(--primary),
-    0 0 80px var(--primary);
+  /* Removed text-shadow for better performance */
 }
 
-/* Circuit board lines */
+/* Circuit board lines - DISABLED for performance */
 .circuit-line {
-  position: absolute;
-  background: linear-gradient(90deg, transparent, var(--primary), transparent);
-  height: 1px;
-  animation: circuit 3s linear infinite;
+  display: none;
 }
 
 @keyframes circuit {

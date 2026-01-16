@@ -92,6 +92,15 @@ public class ForumService {
         postRepository.save(post);
     }
 
+    @Transactional
+    public Post updatePost(Long id, String title, String content) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        post.setTitle(title);
+        post.setContent(content);
+        return postRepository.save(post);
+    }
+
     private PostDTO convertToDTO(Post post) {
         return new PostDTO(
                 post.getId(),

@@ -15,6 +15,13 @@ interface Challenge {
   resourceUrl?: string;
 }
 
+interface Notification {
+  message: string;
+  type: 'success' | 'error' | 'info';
+  points?: number;
+  totalPoints?: number;
+}
+
 export default function ChallengesPage() {
   const { user } = useAuth();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
@@ -23,13 +30,32 @@ export default function ChallengesPage() {
   const [flagInput, setFlagInput] = useState<{ [key: number]: string }>({});
   const [results, setResults] = useState<{ [key: number]: string | null }>({});
   const [solvedChallenges, setSolvedChallenges] = useState<number[]>([]);
+  const [notification, setNotification] = useState<Notification | null>(null);
 
   useEffect(() => {
     loadChallenges();
     if (user) {
       loadSolvedChallenges();
+    } else {
+      // Reset solved challenges when user logs out
+      setSolvedChallenges([]);
+      setResults({});
+      setFlagInput({});
     }
   }, [user]);
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
+  const showNotification = (message: string, type: 'success' | 'error' | 'info', points?: number, totalPoints?: number) => {
+    setNotification({ message, type, points, totalPoints });
+  };
 
   const loadChallenges = async () => {
     try {
@@ -46,15 +72,17 @@ export default function ChallengesPage() {
     if (!user) return;
     try {
       const response = await api.get(`/challenges/solved/user/${user.id}`);
+      // Ensure we're setting fresh data for the current user
       setSolvedChallenges(response.data);
     } catch (error) {
       console.error('Failed to load solved challenges:', error);
+      setSolvedChallenges([]);
     }
   };
 
   const handleSubmitFlag = async (challengeId: number) => {
     if (!user) {
-      alert('Please login to submit flags!');
+      showNotification('Please login to submit flags!', 'info');
       return;
     }
 
@@ -69,14 +97,14 @@ export default function ChallengesPage() {
       setResults({ ...results, [challengeId]: message });
       
       if (response.data.correct) {
-        alert(`${message}\n+${response.data.pointsAwarded} points! Total: ${response.data.totalPoints} points 🎉`);
+        showNotification(message, 'success', response.data.pointsAwarded, response.data.totalPoints);
         setSolvedChallenges([...solvedChallenges, challengeId]);
       } else {
-        alert(message);
+        showNotification(message, 'error');
       }
     } catch (error) {
       console.error('Failed to submit flag:', error);
-      alert('Failed to submit flag. Please try again.');
+      showNotification('Failed to submit flag. Please try again.', 'error');
     }
   };
 
@@ -96,6 +124,45 @@ export default function ChallengesPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Notification Toast */}
+      {notification && (
+        <div className={`fixed top-4 right-4 z-50 max-w-md animate-slide-in-right shadow-2xl ${
+          notification.type === 'success' ? 'bg-green-600' :
+          notification.type === 'error' ? 'bg-red-600' :
+          'bg-blue-600'
+        } text-white px-6 py-4 rounded-lg border-l-4 ${
+          notification.type === 'success' ? 'border-green-400' :
+          notification.type === 'error' ? 'border-red-400' :
+          'border-blue-400'
+        }`}>
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-3">
+              <div className="text-2xl">
+                {notification.type === 'success' ? '🎉' : 
+                 notification.type === 'error' ? '❌' : 
+                 'ℹ️'}
+              </div>
+              <div>
+                <p className="font-semibold">{notification.message}</p>
+                {notification.points && (
+                  <p className="text-sm mt-1 opacity-90">
+                    +{notification.points} points! Total: {notification.totalPoints} points
+                  </p>
+                )}
+              </div>
+            </div>
+            <button 
+              onClick={() => setNotification(null)}
+              className="text-white hover:text-gray-200 ml-4"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       <h1 className="text-4xl font-bold mb-8">Cybersecurity Challenges</h1>
 
       <div className="flex gap-4 mb-8 flex-wrap">

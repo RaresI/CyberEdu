@@ -85,6 +85,19 @@ public class ForumController {
         }
     }
 
+    @PutMapping("/posts/{id}")
+    public ResponseEntity<?> updatePost(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        try {
+            String title = request.get("title");
+            String content = request.get("content");
+            Post post = forumService.updatePost(id, title, content);
+            return ResponseEntity.ok(post);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @DeleteMapping("/posts/{id}")
     public ResponseEntity<?> deletePost(@PathVariable Long id) {
         try {
